@@ -1,0 +1,61 @@
+{
+  "default_SNS_topic_ARN": ["arn:aws:sns:us-east-2:864241695987:Mindtickle_alerting_platform_test"],
+  "monitoring_enabled_tag": {
+    "Key": "monitoring_enabled",
+    "Value": "true"
+  },
+  "resource_types": {
+    "AWS::EC2::Instance": {
+      "Alarms": {
+          "CPU_utilization_percent": {
+            "AlarmName": "CPU_utilization_percent",
+            "AlarmDescription": "Alerts if an ec2 instance is used more",
+            "MetricName": "CPUUtilization",
+            "Namespace": "AWS/EC2",
+            "Period": 300,
+            "EvaluationPeriods": 3,
+            "DatapointsToAlarm": 2,
+            "Threshold": 80,
+            "ComparisonOperator": "GreaterThanThreshold",
+            "Statistic": "Average",
+            "AlarmActions": ["arn:aws:sns:us-east-2:864241695987:Mindtickle_alerting_platform_test"]
+          }
+        }
+    },
+    "AWS::SQS::Queue": {
+      "Alarms": {
+        "Number_of_messages_received": {
+            "AlarmName": "Number_of_messages_received",
+            "AlarmDescription": "Alerts number of received messages is more than threshold",
+            "MetricName": "NumberOfMessagesReceived",
+            "Namespace": "AWS/SQS",
+            "Period": 300,
+            "EvaluationPeriods": 1,
+            "DatapointsToAlarm": 1,
+            "Threshold": 1,
+            "ComparisonOperator": "GreaterThanThreshold",
+            "Statistic": "Average",
+            "AlarmActions": ["arn:aws:sns:us-east-2:864241695987:Mindtickle_alerting_platform_test"]
+        }
+
+      }
+    },
+    "AWS::SNS::Topic" : {
+      "Alarms": {
+        "Number_of_notifications_delivered": {
+            "AlarmName": "Number_of_notifications_delivered",
+            "AlarmDescription": "Alerts number of notifications delivered is more than threshold",
+            "MetricName": "NumberOfNotificationsDelivered",
+            "Namespace": "AWS/SNS",
+            "Period": 300,
+            "EvaluationPeriods": 1,
+            "DatapointsToAlarm": 1,
+            "Threshold": 1,
+            "ComparisonOperator": "GreaterThanThreshold",
+            "Statistic": "Average",
+            "AlarmActions": ["arn:aws:sns:us-east-2:864241695987:Mindtickle_alerting_platform_test"]
+        }
+      }
+    }
+  }
+}
