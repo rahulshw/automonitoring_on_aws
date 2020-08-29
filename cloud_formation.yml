@@ -1,0 +1,71 @@
+AWSTemplateFormatVersion: 2010-09-09
+Metadata: {}
+Resources:
+
+  IAMRoleForSettingAlarms:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17",
+        Statement:
+          - Effect: 'Allow'
+            Principal:
+              Service: 'lambda.amazonaws.com'
+            Action": 'sts:AssumeRole'
+      Description: 'Role for lambda function to set alarms, tag resources'
+      RoleName: 'enable_monitoring_role'
+      Path: '/'
+      Policies:
+        - PolicyName: 'create_monitroing_policy'
+          PolicyDocument:
+            Version": '2012-10-17'
+            Effect: 'Allow'
+            Action:
+              - 'cloudwatch:PutMetricAlarm'
+              - 'cloudwatch:DeleteAlarms'
+              - 'config:PutEvaluations'
+              - 'tag:TagResources'
+            Resource: "*"
+
+  SNSTopicForSendingAlerts:
+    Type: 'AWS::SNS::Topic'
+    Properties:
+      DisplayName: 'Alerts for ${company_name}'
+      TopicName: 'Mindtickle_alerting_platform_test'
+
+  LambdaFunctionWhichSetsAlarms:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      FunctionName: 'enable_monitoring_lambda_function'
+      Description: 'lambda code to enable monitoring'
+      Runtime: 'python3.7'
+      Role: 'arn:aws:iam::${AWS_USER_ID}:role/enable_monitoring_role'
+      Handler: 'lambda_function.lambda_handler'
+      Timeout: 10
+      Code:
+        RepositoryType: 'S3'
+        Location: '${S3_location_of_the_lambda_function_code}'
+
+
+  ConfigRuleForCheckingNewResourcesAndRunningTheLambdaFunctionOnThem:
+    Type: 'AWS::Config::ConfigRule'
+    Properties:
+      Description: 'Config rule to apply the lambda function to any newly created resource'
+      InputParameters: {}
+      Scope:
+        ComplianceResourceTypes:
+          - 'AWS::EC2::Instance'
+          - 'AWS::SQS::Queue'
+          - 'AWS::SNS::Topic'
+      Source:
+        Owner: 'CUSTOM_LAMBDA',
+        SourceIdentifier: 'arn:aws:lambda:${AWS_REGION}:${AWS_USER_ID}:function:enable_monitoring_lambda_function'
+        SourceDetails":
+          - EventSource: 'aws.config'
+            MessageType: 'ConfigurationItemChangeNotification'
+          - EventSource: 'aws.config'
+            MessageType: 'OversizedConfigurationItemChangeNotification'
+
+
+
+
